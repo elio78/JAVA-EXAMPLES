@@ -1,7 +1,6 @@
 // Import the necessary Java synchronization and scheduling classes.
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.Lock;
 
 /**
  * @class SimpleAtomicLong
@@ -21,7 +20,7 @@ class SimpleAtomicLong
      * The ReentrantReadWriteLock used to serialize access to mValue.
      */
     // TODO - replace the null with the appropriate initialization:
-    private ReentrantReadWriteLock mRWLock = null;
+    private ReentrantReadWriteLock mRWLock = new ReentrantReadWriteLock();
 
     /**
      * Creates a new SimpleAtomicLong with the given initial value.
@@ -29,6 +28,7 @@ class SimpleAtomicLong
     public SimpleAtomicLong(long initialValue)
     {
         // TODO - you fill in here
+    	this.mValue = initialValue;
     }
 
     /**
@@ -40,6 +40,9 @@ class SimpleAtomicLong
     {
         long value;
         // TODO - you fill in here, using a readLock()
+        mRWLock.readLock().lock();
+        value = this.mValue;
+        mRWLock.readLock().unlock();
         return value;
     }
 
@@ -52,6 +55,9 @@ class SimpleAtomicLong
     {
         long value;
         // TODO - you fill in here, using a writeLock()
+        mRWLock.writeLock().lock();
+        value = this.mValue--;
+        mRWLock.writeLock().unlock();
         return value;
     }
 
@@ -64,6 +70,10 @@ class SimpleAtomicLong
     {
         long value;
         // TODO - you fill in here, using a writeLock()
+        mRWLock.writeLock().lock();
+        value = this.mValue;
+        this.mValue++;
+        mRWLock.writeLock().unlock();
         return value;
     }
 
@@ -76,6 +86,10 @@ class SimpleAtomicLong
     {
         long value;
         // TODO - you fill in here, using a writeLock()
+        mRWLock.writeLock().lock();
+        value = this.mValue;
+        this.mValue--;
+        mRWLock.writeLock().unlock();
         return value;
     }
 
@@ -88,6 +102,9 @@ class SimpleAtomicLong
     {
         long value;
         // TODO - you fill in here, using a writeLock()
+        mRWLock.writeLock().lock();
+        value = this.mValue++;
+        mRWLock.writeLock().unlock();
         return value;
     }
 }
