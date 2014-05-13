@@ -1,4 +1,4 @@
-POSA-14
+JAVA-EXAMPLES
 =======
 
-This repository contains assignments and examples for the 2014 offering of the POSA MOOC (see www.coursera.org/course/posa for more information)
+This repository is forked from forked from douglascraigschmidt/POSA-14 repository
