@@ -18,41 +18,58 @@ public class SynchronizedQueueTest {
     /**
      * Indicates how big the queue should be.
      */
-    int queueSize;
-	
+    int mQueueSize;
+
     /**
      * Run the test for the queue parameter.
      *
      * @return result. If SynchronizedQueue test ran properly, returns
      * null. If not, returns error message.
      */
-    static String runQueueTest(String qName, QueueAdapter<Integer> queue) {
-    	System.out.println("Starting " + qName + " test...");
+    static SynchronizedQueueResult runQueueTest(String qName,
+                                                QueueAdapter<Integer> queue) {
+    	if (SynchronizedQueue.diagnosticsEnabled) {	    
+            System.out.println("Starting " 
+                               + qName 
+                               + " test...");
+            if (qName == "BuggyBlockingQueue") 
+                System.out.println("An exception may be thrown since "
+                                   + qName
+                                   + " is intentially BUGGY.");
+    	}		
 
+    	/**
+         * We have to instantiate this object because Java doesn't
+    	 * like things being abstract AND static, which makes
+    	 * implementing the Template Pattern statically more painful
+    	 * than it should be.
+         */
         SynchronizedQueueResult result =
-            SynchronizedQueue.testQueue(queue);
+            new SynchronizedQueueImpl().testQueue(queue, qName);
 
-        System.out.println("End " + qName + " test.\n");
-        System.out.println("See JUnit view for results -- \n" +
-                           "Green check-marks denote program correctness. \n" +
-                           "Blue x-marks indicate a problem with your implementation. \n");
+        if (SynchronizedQueue.diagnosticsEnabled) {
+            System.out.println("End " + qName + " test.\n");
+            System.out.println("See JUnit view for results -- \n" 
+                               + "Green check-marks denote program correctness. \n" 
+                               + "Blue x-marks indicate a problem with your implementation. \n");
+        }
         
         if (result != SynchronizedQueueResult.RAN_PROPERLY)
-            return result.getString();
-		
-        return null;
+            return result;
+        else
+            return null;
     }
-	
+
     /**
-     * Runs before each test. Sets queueSize.
+     * Runs before each test. Sets mQueueSize.
      * @throws Exception
      */
     @Before
-    public void setUp() throws Exception {
+        public void setUp() throws Exception {
         // Indicate how big the queue should be, which should be
         // smaller than the number of iterations to induce blocking
         // behavior.
-        queueSize = SynchronizedQueue.mMaxIterations / 10;
+        mQueueSize = SynchronizedQueue.mMaxIterations / 10;
     }
 
     /**
@@ -60,15 +77,25 @@ public class SynchronizedQueueTest {
      */
     @Test
     public void arrayBlockingQueueTest() {
+        // Make the appropriate QueueAdapter for the
+        // ArrayBlockingQueue.
         QueueAdapter<Integer> queueAdapter =
-            new QueueAdapter<Integer>(new ArrayBlockingQueue<Integer>(queueSize));
-        String errors = runQueueTest("ArrayBlockingQueue", queueAdapter);
+            new QueueAdapter<Integer>(new ArrayBlockingQueue<Integer>(mQueueSize));
+
+        // Run a test on the ArrayBlockingQueue.
+        SynchronizedQueueResult errors =
+            runQueueTest("ArrayBlockingQueue", queueAdapter);
+
+        String errorMessage = "";
+        
+        if (errors != null) 
+            errorMessage = errors.getString();
 
         assertNull("Error occurred: " + 
-                   errors,
+                   errorMessage,
                    errors);
     }
-	
+
     /**
      * Tests the BuggyBlockingQueue, an intentionally flawed class.
      * The buggyBlockingQueueTest() will succeed if the testQueue
@@ -77,12 +104,18 @@ public class SynchronizedQueueTest {
      */
     @Test
     public void buggyBlockingQueueTest() {
+        // Make the appropriate QueueAdapter for the
+        // BuggyBlockingQueue.
+
         QueueAdapter<Integer> queueAdapter =
-            new QueueAdapter<Integer>(new BuggyBlockingQueue<Integer>(queueSize));
-        String errors = runQueueTest("BuggyBlockingQueue", queueAdapter);
+            new QueueAdapter<Integer>(new BuggyBlockingQueue<Integer>(mQueueSize));
+
+        // Run a test on the BuggyBlockingQueue.
+        SynchronizedQueueResult errors =
+            runQueueTest("BuggyBlockingQueue", queueAdapter);
+        
         assertNotNull("Test should not complete without errors. " +
                       "BuggyBlockingQueue is intended to function incorrectly.",
                       errors);
     }
-
 }
